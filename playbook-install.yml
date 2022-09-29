@@ -1,0 +1,46 @@
+---
+- name: Softvare install
+#  hosts: NGINX
+  hosts: BL
+  become: yes
+  tasks:
+
+  - name: Update and Upgrade
+    ansible.builtin.apt:
+        update_cache=yes
+#     upgrade=yes
+  - name: Install Package
+    ansible.builtin.apt:
+      pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+  - name: somerepo |no apt key
+    ansible.builtin.apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: Add Repo
+    ansible.builtin.apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+
+  - name: Update and Upgrade
+    ansible.builtin.apt:
+      update_cache=yes
+
+  - name: Install Docker
+    ansible.builtin.apt:
+      pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+
+  - name: Install Docker-compose 1.25.0
+    ansible.builtin.shell: curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose |  chmod +x /usr/local/bin/docker-compose
+  - name: Enable Docker
+    ansible.builtin.systemd:
+      name: docker
+      enabled: yes
+      masked: no

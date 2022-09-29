@@ -1,0 +1,9 @@
+[NGINX]
+nc1 ansible_host=IP
+
+
+[NC_BL]
+NC2 ansible_host=IP
+
+[BL]
+NC_LB ansible_host=IP
