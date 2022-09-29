@@ -1,0 +1,18 @@
+version: "3"
+services:
+    elastic:
+        image: {{ es_image }}
+        restart: unless-stopped
+        environment:
+            - xpack.security.enabled=false
+            - bootstrap.memory_lock=true
+            - cluster.name=docker-cluster
+            - cluster.routing.allocation.disk.threshold_enabled=false
+            - discovery.type=single-node
+            - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
+
+        ports:
+            - "{{ es_port }}:{{ es_port }}"
+            - "{{ es_m_port }}:{{ es_m_port }}"
+              #        volumes:
+              #            - /data/elasticsearch:/usr/share/elasticsearch/

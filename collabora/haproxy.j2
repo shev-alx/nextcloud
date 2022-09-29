@@ -1,0 +1,49 @@
+global
+#        log 172.22.34.10   local0 notice
+        # log /var/run/log local0 notice
+        # stats socket /var/run/haproxy-stat.sock level admin
+        # stats timeout 2m
+        log         127.0.0.1 local2
+        maxconn 20480
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    5s
+    timeout queue           20s
+    timeout connect         3000000
+    timeout client          6600000
+    timeout server          6600000
+#    timeout http-keep-alive 7s
+#    timeout check           7s
+    maxconn                 400000
+
+
+
+frontend coolwsd
+  bind *:443 ssl crt /usr/local/etc/haproxy/ssl/full.pem
+  mode http
+  default_backend coolwsd
+
+backend coolwsd
+  timeout tunnel 3600s
+  mode http
+  balance url_param WOPISrc check_post
+  hash-type consistent
+  server coolwsd01 127.0.0.1:{{ cb_port_1 }}
+  server coolwsd02 127.0.0.1:{{ cb_port_2 }}
+
+  listen stats
+  bind    :{{ ha_mon_port }}
+  balance
+  mode http
+  stats enable
+  stats uri /admin?stats
+  stats refresh 5s
+  stats realm Haproxy\ Statistics
+  stats auth admin:slbstats

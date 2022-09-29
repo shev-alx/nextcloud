@@ -1,0 +1,35 @@
+- name: Install Redis Docker compose
+#  hosts: NGINX
+  hosts: NC_BL
+  become: yes
+  vars:
+    rd_image      : redis:7
+    rd_folder     : /opt/build/redis
+    rd_port       : 6388
+
+  tasks:
+    - name: Mkdir Build
+      ansible.builtin.shell: mkdir -p {{ rd_folder }}
+
+    - name: Copy docker_compose.yml
+      ansible.builtin.template:
+        src: "./redis/docker-compose.j2"
+        dest: "{{ rd_folder }}/docker-compose.yml"
+
+    - name: Copy Redis Conf
+      ansible.builtin.template:
+        src: "./redis/redis.j2"
+        dest: "{{ rd_folder }}/redis.conf"
+
+    - name: Touch Redis log file
+      ansible.builtin.file:
+        path: "{{ rd_folder }}/redis.log"
+        state: touch
+        mode: u=rw,g=rw,o=rw
+
+    - name: Restart Docker Collabora
+      ansible.builtin.shell: /usr/local/bin/docker-compose -f {{ rd_folder }}/docker-compose.yml down &&  /usr/local/bin/docker-compose -f {{ rd_folder }}/docker-compose.yml up -d && /usr/local/bin/docker-compose -f {{ rd_folder }}/docker-compose.yml ps
+      register: output
+
+    - debug:
+        var: output.stdout_lines

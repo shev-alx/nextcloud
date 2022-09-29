@@ -1,0 +1,46 @@
+version: "3"
+services:
+  haproxy:
+#    image: haproxy:1.8-alpine
+    image: {{ ha_image }}
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - {{ ha_folder }}/haproxy:/usr/local/etc/haproxy
+
+    ports:
+      - "{{ ha_mon_port }}:{{ ha_mon_port }}"
+
+  collabora1:
+#    image: collabora/code
+    image: {{ cb_image }}
+      #    network_mode: "host"
+    ports:
+#- "127.0.0.1:9993:9980"
+      - "127.0.0.1:{{ cb_port_1 }}:{{ cb_port_def }}"
+    environment:
+      #      - VIRTUAL_HOST=docs.s24.net.ua
+      #      - LETSENCRYPT_HOST=https://docs.s24.net.ua/
+      # Admin UI link: https://docs.s24.net.ua/browser/dist/admin/admin.html
+      - username=admin
+      - password=JFhqbE43w17
+      - dictionaries=uk_UA ru_RU en_GB en_US
+#      - aliasgroup1=https://test.s24.net.ua
+#      - aliasgroup2=https://cloud.s24.net.ua
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true --o:net.post_allow.host[0]=.+ --o:storage.wopi.host[0]=.+ --o:net.proto=ipv4
+  collabora2:
+    #    image: collabora/code
+    image: {{ cb_image }}
+          #    network_mode: "host"
+    ports:
+      - "127.0.0.1:{{ cb_port_2 }}:{{ cb_port_def }}"
+    environment:
+          #      - VIRTUAL_HOST=docs.s24.net.ua
+          #      - LETSENCRYPT_HOST=https://docs.s24.net.ua/
+          # Admin UI link: https://docs.s24.net.ua/browser/dist/admin/admin.html
+      - username=admin
+      - password=JFhqbE43w17
+      - dictionaries=uk_UA ru_RU en_GB en_US
+    #      - aliasgroup1=https://test.s24.net.ua
+    #      - aliasgroup2=https://cloud.s24.net.ua
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true --o:net.post_allow.host[0]=.+ --o:storage.wopi.host[0]=.+ --o:net.proto=ipv4

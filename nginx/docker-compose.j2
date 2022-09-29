@@ -1,0 +1,23 @@
+version: "3"
+services:
+    nginx:
+        image: {{ nginx_image }}
+        restart: unless-stopped
+        network_mode: "host"
+#        extra_hosts:
+#            - "mysql:10.105.44.12"
+#            - "redis:10.105.44.14"
+#            - "elastic:10.105.44.15"
+#            - "collabora.local:10.105.44.14"
+        ports:
+            - "80:80"
+            - "443:443"
+#        environment:
+#            - MYSQL_DATABASE=nextcloud
+#            - MYSQL_USER=nextclouduser
+#            - MYSQL_PASSWORD=changeme
+#            - MYSQL_HOST=db
+        volumes:
+            - {{ nginx_folder }}/nginx:/etc/nginx
+            - {{ nextcloud_folder }}/html:/var/www/html
+            - {{ nextcloud_data }}:/data

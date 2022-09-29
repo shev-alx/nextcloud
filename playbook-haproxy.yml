@@ -1,0 +1,36 @@
+---
+- name: Install Collabora and Haproxy Docker compose
+#  hosts: NGINX
+  hosts: BL
+  become: yes
+  vars:
+    hp_image      : haproxy:1.8-alpine
+    hp_folder     : /opt/build/haproxy
+    hp_mon_port   : 8084
+    nx_frontend   : 172.30.110.49
+
+  tasks:
+    - name: Mkdir Build
+      ansible.builtin.shell: mkdir -p {{ hp_folder }}/haproxy/ssl
+
+    - name: Copy docker_compose.yml
+      ansible.builtin.template:
+        src: "./haproxy/docker-compose.j2"
+        dest: "{{ hp_folder }}/docker-compose.yml"
+
+    - name: Copy docker_compose.yml
+      ansible.builtin.template:
+        src: "./haproxy/haproxy.j2"
+        dest: "{{ hp_folder }}/haproxy/haproxy.cfg"
+
+    - name: Copy ssl files Haproxy
+      copy:
+        src: "./haproxy/ssl/"
+        dest: "{{ hp_folder }}/haproxy/ssl"
+
+    - name: Restart Docker Haproxy
+      ansible.builtin.shell: /usr/local/bin/docker-compose -f {{ hp_folder }}/docker-compose.yml down &&  /usr/local/bin/docker-compose -f {{ hp_folder }}/docker-compose.yml up -d && /usr/local/bin/docker-compose -f {{ hp_folder }}/docker-compose.yml ps
+      register: output
+
+    - debug:
+        var: output.stdout_lines

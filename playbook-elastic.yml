@@ -1,0 +1,25 @@
+- name: Install elastic Docker compose
+#  hosts: NGINX
+  hosts: NC_BL
+  become: yes
+  vars:
+    es_image      : elasticsearch:7.17.5
+    es_folder     : /opt/build/elastic
+    es_port       : 9200
+    es_m_port     : 9300
+
+  tasks:
+    - name: Mkdir Build
+      ansible.builtin.shell: mkdir -p {{ es_folder }}
+
+    - name: Copy docker_compose.yml
+      ansible.builtin.template:
+        src: "./elastic/docker-compose.j2"
+        dest: "{{ es_folder }}/docker-compose.yml"
+
+    - name: Restart Docker elasticsearch
+      ansible.builtin.shell: /usr/local/bin/docker-compose -f {{ es_folder }}/docker-compose.yml down &&  /usr/local/bin/docker-compose -f {{ es_folder }}/docker-compose.yml up -d && /usr/local/bin/docker-compose -f {{ es_folder }}/docker-compose.yml ps
+      register: output
+
+    - debug:
+        var: output.stdout_lines

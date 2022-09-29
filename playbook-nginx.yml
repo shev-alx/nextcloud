@@ -1,0 +1,41 @@
+---
+- name: Install NGINX Docker compose
+  hosts: NGINX
+  become: yes
+  vars:
+    nginx_image      : nginx:stable
+    nginx_folder     : /opt/build/nginx
+    nextcloud_folder : /opt/build/nextcloud
+    nextcloud_data   : /data
+#    nginx_files:
+#      - "./nginx/nginx"
+
+  tasks:
+  - name: Mkdir Build
+    ansible.builtin.shell: mkdir -p {{ nginx_folder }}/nginx/conf.d
+
+  - name: Copy docker_compose.yml
+    ansible.builtin.template:
+      src: "./nginx/docker-compose.j2"
+      dest: "{{ nginx_folder }}/docker-compose.yml"
+
+  - name: Copy files NGINX
+    copy:
+      src: "./nginx/nginx/"
+      dest: "{{ nginx_folder }}/nginx"
+#      loop: "{{ nginx_files }}"
+#    vars:
+#      nginx_files:
+#      - "./nginx/nginx"
+
+  - name: Copy NGINX virtual host
+    ansible.builtin.template:
+      src: "./nginx/nextcloud.j2"
+      dest: "{{ nginx_folder }}/nginx/conf.d/nextcloud.conf"
+
+  - name: Restart Docker Ningx
+    ansible.builtin.shell: /usr/local/bin/docker-compose -f {{ nginx_folder }}/docker-compose.yml down &&  /usr/local/bin/docker-compose -f {{ nginx_folder }}/docker-compose.yml up -d && /usr/local/bin/docker-compose -f {{ nginx_folder }}/docker-compose.yml ps
+    register: output
+
+  - debug:
+      var: output.stdout_lines

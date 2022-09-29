@@ -1,0 +1,19 @@
+version: "3"
+services:
+  next-app:
+#    image: nextcloud:22-fpm
+    image: {{ nx_image }}
+    restart: unless-stopped
+#        network_mode: "host"
+#    extra_hosts:
+#      - "mysql:10.105.44.12"
+#      - "redis:10.105.44.14"
+#      - "elastic:10.105.44.15"
+
+    ports:
+      - "127.0.0.1:{{ nx_port_def }}:{{ nx_port_def }}"
+  # volumes:
+  #   - /opt/build/nextcloud/php-fpm:/usr/local/etc/php-fpm.d
+  #    - {{ nx_folder }}/html:{{ nx_folder_end }}
+  #    - {{ nx_folder }}/setting.ini:/usr/local/etc/php/conf.d/setting.ini
+  #    - ./{{ nx_data }}:/data

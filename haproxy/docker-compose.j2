@@ -1,0 +1,12 @@
+version: "3"
+services:
+  haproxy:
+    image: {{ hp_image }}
+    restart: unless-stopped
+    network_mode: "host"
+
+    volumes:
+      - {{ hp_folder }}/haproxy:/usr/local/etc/haproxy
+
+#    ports:
+#      - "{{ hp_mon_port }}:{{ hp_mon_port }}"
